@@ -7,3 +7,5 @@ This Python program utilizes the OpenCV library for detecting faces in images or
 - `simple_facerec`:the simple_facerec library for the main file.
 
 **note**:you can put your photo in `images` folder and see the name of the file(the name you gave to your photo)above the red square in the middle of your camera if it reconizes you well.after that it'll write "(your name) is present" in the terminal and also in the txt file(`text`) and sends it to a local server network like WI_FI.
+
+I will appreciate your help  in improving this code and solving my problem.
