@@ -101,7 +101,7 @@ with open(file_path, "w") as file:
         ret, frame = cap.read()
         face_location, name = sfr.detect_known_faces(frame)
         height, width, _ = frame.shape
-        cv2.rectangle(frame, (0, 0), (width, height), (0, 0, 200), 2)
+        
 
         for face_loc, name in zip(face_location, name):
             if name not in nameless:
