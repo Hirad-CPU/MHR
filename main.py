@@ -120,10 +120,10 @@ def frame_to_rgb565(frame):
     for y in range(HEIGHT):
         for x in range(WIDTH):
             r, g, b = img[y, x]
-            # اطمینان از اینکه مقادیر در محدوده 0-255 هستند
-            r = max(0, min(255, r))
-            g = max(0, min(255, g))
-            b = max(0, min(255, b))
+            # اطمینان از اینکه مقادیر در محدوده 0-255 هستند و به صورت صحیح هستند
+            r = int(max(0, min(255, r)))
+            g = int(max(0, min(255, g)))
+            b = int(max(0, min(255, b)))
             
             # تبدیل به RGB565: 5 بیت قرمز، 6 بیت سبز، 5 بیت آبی
             r5 = (r >> 3) & 0x1F  # 5 بیت قرمز
@@ -131,6 +131,8 @@ def frame_to_rgb565(frame):
             b5 = (b >> 3) & 0x1F  # 5 بیت آبی
             rgb565 = (r5 << 11) | (g6 << 5) | b5  # ترکیب بیت‌ها
             
+            # بررسی اینکه rgb565 در محدوده 0 تا 65535 است
+            rgb565 = min(65535, max(0, rgb565))
             # تقسیم به دو بایت 8 بیتی
             pixel_data.append((rgb565 >> 8) & 0xFF)  # بایت بالایی
             pixel_data.append(rgb565 & 0xFF)          # بایت پایینی
