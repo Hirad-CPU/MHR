@@ -108,13 +108,20 @@ def frame_to_rgb565(frame):
     for y in range(HEIGHT):
         for x in range(WIDTH):
             r, g, b = img[y, x]
+            # چاپ مقادیر برای دیباگ (اختیاری)
+            # print(f"r={r}, g={g}, b={b}")
             # اطمینان از اینکه مقادیر در محدوده 0-255 هستند
             r = max(0, min(255, r))
             g = max(0, min(255, g))
             b = max(0, min(255, b))
             
-            # تبدیل به RGB565
-            rgb565 = min(65535, max(0, ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)))
+            # تبدیل به RGB565: 5 بیت قرمز، 6 بیت سبز، 5 بیت آبی
+            r5 = (r >> 3) & 0x1F  # 5 بیت قرمز
+            g6 = (g >> 2) & 0x3F  # 6 بیت سبز
+            b5 = (b >> 3) & 0x1F  # 5 بیت آبی
+            rgb565 = (r5 << 11) | (g6 << 5) | b5  # ترکیب بیت‌ها
+            
+            # تقسیم به دو بایت 8 بیتی
             pixel_data.append((rgb565 >> 8) & 0xFF)  # بایت بالایی
             pixel_data.append(rgb565 & 0xFF)          # بایت پایینی
     
@@ -145,8 +152,9 @@ init_display()
 while True:
     ret, frame = cap.read()
     if not ret:
+        print("خطا: فریم از دوربین دریافت نشد!")
         break
-
+    
     # تشخیص چهره
     face_locations, names = sfr.detect_known_faces(frame)
     for face_loc, name in zip(face_locations, names):
