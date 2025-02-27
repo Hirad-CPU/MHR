@@ -31,6 +31,10 @@ def send_command(cmd):
     CS.on()
 
 def send_data(data):
+    if data is None:
+        print("خطا: داده ورودی None است!")
+        return
+    
     DC.on()
     CS.off()
     chunk_size = 4096
@@ -100,16 +104,22 @@ def set_address_window(x0, y0, x1, y1):
     send_command(ILI9341_RAMWR)
 
 def frame_to_rgb565(frame):
-    # تغییر اندازه فریم به ابعاد نمایشگر
-    img = cv2.resize(frame, (WIDTH, HEIGHT))
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # تبدیل BGR به RGB
+    if frame is None:
+        print("خطا: فریم ورودی None است!")
+        return []
     
+    # تغییر اندازه فریم به ابعاد نمایشگر
+    try:
+        img = cv2.resize(frame, (WIDTH, HEIGHT))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # تبدیل BGR به RGB
+    except Exception as e:
+        print(f"خطا در پردازش تصویر: {e}")
+        return []
+
     pixel_data = []
     for y in range(HEIGHT):
         for x in range(WIDTH):
             r, g, b = img[y, x]
-            # چاپ مقادیر برای دیباگ (اختیاری)
-            # print(f"r={r}, g={g}, b={b}")
             # اطمینان از اینکه مقادیر در محدوده 0-255 هستند
             r = max(0, min(255, r))
             g = max(0, min(255, g))
@@ -128,6 +138,10 @@ def frame_to_rgb565(frame):
     return pixel_data
 
 def display_frame(frame):
+    if frame is None:
+        print("خطا: فریم ورودی None است!")
+        return
+    
     set_address_window(0, 0, WIDTH - 1, HEIGHT - 1)
     frame_data = frame_to_rgb565(frame)
     if not frame_data:  # بررسی اینکه داده خالی نباشد
@@ -151,10 +165,11 @@ init_display()
 # حلقه اصلی
 while True:
     ret, frame = cap.read()
-    if not ret:
-        print("خطا: فریم از دوربین دریافت نشد!")
-        break
-    
+    if not ret or frame is None:
+        print("خطا: فریم از دوربین دریافت نشد یا فریم None است!")
+        time.sleep(0.1)  # تاخیر کوتاه برای جلوگیری از مصرف بی‌مورد CPU
+        continue
+
     # تشخیص چهره
     face_locations, names = sfr.detect_known_faces(frame)
     for face_loc, name in zip(face_locations, names):
