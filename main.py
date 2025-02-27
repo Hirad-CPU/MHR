@@ -109,14 +109,24 @@ def frame_to_rgb565(frame):
     for y in range(HEIGHT):
         for x in range(WIDTH):
             r, g, b = img[y, x]
+            # اطمینان از اینکه مقادیر در محدوده 0-255 هستند
+            r = max(0, min(255, r))
+            g = max(0, min(255, g))
+            b = max(0, min(255, b))
+            
+            # تبدیل به RGB565
             rgb565 = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
-            pixel_data.append(rgb565 >> 8)
-            pixel_data.append(rgb565 & 0xFF)
+            pixel_data.append((rgb565 >> 8) & 0xFF)  # بایت بالایی
+            pixel_data.append(rgb565 & 0xFF)          # بایت پایینی
+    
     return pixel_data
 
 def display_frame(frame):
     set_address_window(0, 0, WIDTH - 1, HEIGHT - 1)
     frame_data = frame_to_rgb565(frame)
+    if not frame_data:  # بررسی اینکه داده خالی نباشد
+        print("خطا: داده فریم خالی است!")
+        return
     send_data(frame_data)
 
 # --- تنظیمات تشخیص چهره ---
