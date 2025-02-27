@@ -6,14 +6,14 @@ import spidev
 import time
 from PIL import Image
 
-# تنظیم پایه‌های GPIO برای نمایشگر LCD
-CS = DigitalOutputDevice(22)
-DC = DigitalOutputDevice(17)
-RST = DigitalOutputDevice(27)
+# تنظیمات نمایشگر LCD (ILI9341)
+CS = DigitalOutputDevice(22)    # Chip Select
+DC = DigitalOutputDevice(17)    # Data/Command
+RST = DigitalOutputDevice(27)   # Reset
 
-# مقداردهی اولیه SPI
+# راه‌اندازی SPI
 spi = spidev.SpiDev(0, 0)
-spi.max_speed_hz = 40000000  
+spi.max_speed_hz = 40000000
 
 # دستورات ILI9341
 ILI9341_SWRESET = 0x01
@@ -27,13 +27,13 @@ WIDTH = 240
 HEIGHT = 320
 
 def send_command(cmd):
-    DC.off()
+    DC.off()  
     CS.off()
     spi.writebytes([cmd])
     CS.on()
 
 def send_data(data):
-    DC.on()
+    DC.on()  
     CS.off()
     if isinstance(data, int):
         spi.writebytes([data])
@@ -48,27 +48,23 @@ def init_display():
     time.sleep(0.1)
     RST.on()
     time.sleep(0.1)
-
+    
     send_command(ILI9341_SWRESET)
     time.sleep(0.12)
-
     send_command(ILI9341_SLPOUT)
     time.sleep(0.12)
-
     send_command(ILI9341_DISPON)
     time.sleep(0.12)
 
 def set_address_window(x0, y0, x1, y1):
     send_command(ILI9341_CASET)
     send_data([x0 >> 8, x0 & 0xFF, x1 >> 8, x1 & 0xFF])
-
     send_command(ILI9341_PASET)
     send_data([y0 >> 8, y0 & 0xFF, y1 >> 8, y1 & 0xFF])
-
     send_command(ILI9341_RAMWR)
 
 def convert_image_to_rgb565(image):
-    img = img.resize((WIDTH, HEIGHT))
+    img = image.resize((WIDTH, HEIGHT))
     img = img.convert('RGB')
 
     pixel_data = []
@@ -80,11 +76,12 @@ def convert_image_to_rgb565(image):
             pixel_data.append(rgb565 & 0xFF)
     return pixel_data
 
-def display_image_on_lcd(frame):
+def display_image_on_lcd(image):
     set_address_window(0, 0, WIDTH - 1, HEIGHT - 1)
-    image_data = convert_image_to_rgb565(frame)
+    image_data = convert_image_to_rgb565(image)
     send_data(image_data)
 
+# شروع کد تشخیص چهره و ذخیره‌سازی داده‌ها
 nameless = []
 sfr = SimpleFacerec()
 sfr.load_encoding_images("images/")
@@ -95,14 +92,12 @@ cap = cv2.VideoCapture(1)
 file_path = "text.txt"
 
 with open(file_path, "w") as file:
-    init_display()  # مقداردهی اولیه نمایشگر LCD
-
     while True:
         ret, frame = cap.read()
         face_location, name = sfr.detect_known_faces(frame)
         height, width, _ = frame.shape
+       
         
-
         for face_loc, name in zip(face_location, name):
             if name not in nameless:
                 name_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -113,12 +108,37 @@ with open(file_path, "w") as file:
                 nameless.append(name)
             print(name)
 
-        # نمایش تصویر روی LCD به جای نمایش در OpenCV
-        display_image_on_lcd(frame)
+        # نمایش تصویر در LCD
+        frame_image = Image.fromarray(frame)  # تبدیل تصویر OpenCV به تصویر قابل استفاده برای PIL
+        display_image_on_lcd(frame_image)  # نمایش تصویر روی LCD
+
+        cv2.imshow("Frame", frame)
 
         key = cv2.waitKey(1)
-        if key == 27:  # اگر کلید ESC فشرده شود، برنامه متوقف می‌شود
+        if key == 27:  # اگر کلید ESC فشرده شود، سرور HTTP اجرا می‌شود
             break
 
 cap.release()
 cv2.destroyAllWindows()
+
+# راه‌اندازی سرور HTTP
+from http.server import SimpleHTTPRequestHandler, HTTPServer
+
+class CustomHandler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == "/text.txt":
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            with open(file_path, "r") as f:
+                self.wfile.write(f.read().encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b"File not found.")
+
+print("Starting server...")
+server_address = ("192.168.1.55", 8000)  # آدرس و پورت سرور
+httpd = HTTPServer(server_address, CustomHandler)
+print(f"Server running at http://{server_address[0]}:{server_address[1]}/text.txt")
+httpd.serve_forever()
