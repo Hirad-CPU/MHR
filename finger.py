@@ -142,9 +142,9 @@ def enroll_finger(location):
 def get_num():
     """Use input() to get a valid number from 1 to 127. Retry till success!"""
     i = 0
-    while (i > 127) or (i < 1):
+    while (i > 1000) or (i < 1):
         try:
-            i = int(input("Enter ID # from 1-127: "))
+            i = int(input("Enter ID # from 1-1000: "))
         except ValueError:
             pass
     return i
