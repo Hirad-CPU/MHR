@@ -1,6 +1,3 @@
-# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
-# SPDX-License-Identifier: MIT
-
 import time
 import board
 import adafruit_fingerprint
@@ -148,6 +145,35 @@ def get_num():
         except ValueError:
             pass
     return i
+# تابعی برای خواندن فایل و تبدیل به دیکشنری
+def load_fingerprint_data(filename="fingerprints.txt"):
+    fingerprint_dict = {}  # دیکشنری برای نگه‌داری داده‌ها
+    try:
+        with open(filename, "r") as file:
+            for line in file:
+                parts = line.strip().split(maxsplit=1)  # جدا کردن ID و نام
+                if len(parts) == 2:  # اطمینان از اینکه داده‌ها درست باشند
+                    fingerprint_id, name = parts
+                    fingerprint_dict[int(fingerprint_id)] = name  # ذخیره در دیکشنری
+    except FileNotFoundError:
+        print("Error: File not found!")
+    return fingerprint_dict
+def check_and_store(value, filename="data.txt"):
+    try:
+        with open(filename, "r") as file:
+            lines = file.read().splitlines()  # خواندن تمام خطوط و حذف \n
+    except FileNotFoundError:
+        lines = []
+
+    if str(value) not in lines:
+        with open(filename, "a") as file:
+            file.write(str(value) + "\n")
+        print(f'"{value}" به فایل اضافه شد.')
+    else:
+        print(f'"{value}" قبلاً در فایل وجود دارد.')
+
+# بارگذاری نام‌ها از فایل
+fingerprint_names = load_fingerprint_data()
 
 while True:
     print("----------------")
@@ -158,17 +184,17 @@ while True:
     print("f) find print")
     print("d) delete print")
     print("----------------")
-    c = input("> ")
+    
+    # تابع بررسی اثر انگشت
+    if get_fingerprint():
+        user_id = finger.finger_id
+        confidence = finger.confidence
 
-    if c == "e":
-        enroll_finger(get_num())
-    if c == "f":
-        if get_fingerprint():
-            print("Detected #", finger.finger_id, "with confidence", finger.confidence)
-        else:
-            print("Finger not found")
-    if c == "d":
-        if finger.delete_model(get_num()) == adafruit_fingerprint.OK:
-            print("Deleted!")
-        else:
-            print("Failed to delete")
+        # بررسی اینکه ID در دیکشنری وجود دارد یا نه
+        if user_id in fingerprint_names:
+            print("Detected:", fingerprint_names[user_id], "with confidence", confidence)
+            # تست کد
+        check_and_store("test_value")
+
+    else:
+        print("Detected unknown fingerprint with confidence", confidence)
