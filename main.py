@@ -11,8 +11,7 @@ DC = DigitalOutputDevice(17)  # Data/Command
 RST = DigitalOutputDevice(27) # Reset
 
 spi = spidev.SpiDev(0, 0)
-spi.max_speed_hz = 40000000  
-
+spi.max_speed_hz = 60000000
 # دستورات ILI9341
 ILI9341_SWRESET = 0x01
 ILI9341_SLPOUT  = 0x11
@@ -169,7 +168,7 @@ while True:
     ret, frame = cap.read()
     if not ret or frame is None:
         print("خطا: فریم از دوربین دریافت نشد یا فریم None است!")
-        time.sleep(0.1)  # تاخیر کوتاه برای جلوگیری از مصرف بی‌مورد CPU
+      # تاخیر کوتاه برای جلوگیری از مصرف بی‌مورد CPU
         continue
 
     # تشخیص چهره
@@ -185,9 +184,6 @@ while True:
 
     # نمایش فریم روی نمایشگر
     display_frame(frame)
-
-    # نمایش فریم در پنجره OpenCV (اختیاری، برای دیباگ)
-    cv2.imshow("Frame", frame)
 
     # خروج با کلید ESC
     key = cv2.waitKey(1)
