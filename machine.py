@@ -11,6 +11,18 @@ def machine(message):
     class result:
         def __init__(self,date):
             self.date=date
+            # نام فایل متنی
+            self.file_name = f"{self.date}.txt"
+            # لیست داده‌هایی که می‌خواهید بررسی کنید
+            self.seven_list=['هیراد','Taha']
+            self.eight_list=['Hirad','Matin']
+            self.nine_list=['Hirad','Rastin']
+        
+            #لیست افراد حاضر
+            self.pressent_seven=[]
+            self.pressent_eight=[]
+            self.pressent_nine=[]
+            
         def print_absent():
             print(1)
 
@@ -20,29 +32,29 @@ def machine(message):
         def print_function(self):
             return("🖨 در حال پرینت گرفتن...")
         def absent(self):
+            self.pressent(1)
             #لیست افراد غایب
             self.not_seven=list(set(self.seven_list)-set(self.pressent_seven))
             self.not_eight=list(set(self.eight_list)-set(self.pressent_eight))
             self.not_nine=list(set(self.nine_list)-set(self.pressent_nine))
+
+
+            self.result_not = (
+                "کلاس هفتم:"
+                f"{', '.join(self.not_seven)}\n"
+                "کلاس هشتم:"
+                f"{', '.join(self.not_eight)}\n"
+                "کلاس نهم:"
+                f"{', '.join(self.not_nine)}"
+)
             
             print(self.not_seven,self.not_eight,self.not_nine)
-
-        def pressent(self):
-
-            file_name = f"{self.date}.txt"
-            # لیست داده‌هایی که می‌خواهید بررسی کنید
-            self.seven_list=['هیراد',' Taha']
-            self.eight_list=['Hirad','Matin']
-            self.nine_list=['Hirad','Rastin']
-        
-            #لیست افراد حاضر
-            self.pressent_seven=[]
-            self.pressent_eight=[]
-            self.pressent_nine=[]
-            # نام فایل متنی
-
+            return self.result_not
+            
+        def pressent(self,number):
+            print(self.file_name)
             # خواندن محتوای فایل و ذخیره به صورت یک مجموعه (set)
-            with open(file_name, "r", encoding="utf-8") as file:
+            with open(self.file_name, "r", encoding="utf-8") as file:
                 file_data = set(file.read().splitlines())  # خواندن خطوط و حذف تکراری‌ها
             for i, p in zip([self.seven_list, self.eight_list, self.nine_list], 
                         [self.pressent_seven, self.pressent_eight, self.pressent_nine]):
@@ -62,9 +74,9 @@ def machine(message):
                 f"{', '.join(self.pressent_nine)}"
 )
             
-
-            print(self.result_present)
-            return self.result_present
+            if number==0:
+                print(self.result_present)
+                return self.result_present
 
 
 
@@ -79,8 +91,17 @@ def machine(message):
         "لطفا حاضرین دیروز رو بده",
         "حاضرین دیروز رو بنویس",
         "حاضرین پریروز",
-        "لطفا حاضرن پریروز رو بده",
+        "لطفا حاضرین پریروز رو بده",
         "حاضرین پریروز رو بنویس",
+        "غایبین امروز",
+        "لطفا غایبین امروز رو بده",
+        "غایبین امروز رو بنویس",
+        "غایبین دیروز",
+        "لطفا غایبین دیروز رو بده",
+        "غایبین دیروز رو بنویس",
+        "غایبین پریروز",
+        "لطفا غایبین پریروز رو بده",
+        "غایبین پریروز رو بنویس",
         "حاضرین امروز رو پرینت کن ",
         "پرینت کن حاضرین امروز رو",
         "پرینت حاضرین امروز ",
@@ -91,7 +112,7 @@ def machine(message):
         "حاضرین پریروز رو پرینت کن",
         "پرینت حاضرین پریروز "
     ]
-    labels = [0, 0, 0, 1, 1, 1, 2, 2, 2, 20, 20, 20, 21, 21, 21, 22, 22, 22] #مقددار دهی دستور ها
+    labels = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 20, 20, 20, 21, 21, 21, 22, 22, 22] #مقددار دهی دستور ها
 
     # مرحله ۱: استخراج ویژگی‌های متنی با TF-IDF
     vectorizer = TfidfVectorizer()
@@ -109,17 +130,23 @@ def machine(message):
 
     # پیش‌بینی دسته دستور
     pred = int(clf.predict(X_input)[0])
+
+
+    print(pred)
     #
     #برگذازی شرایط برای پرینتر
-    if pred in [20, 21, 22]:
+    if pred in [20, 21, 22, 23, 24, 25]:
         pred-=20
         n=1
-    
+    #پیدا کردن تاریخ مربوط به دستور غایبین
+    f=pred    
+    if 2<pred<20:
+        f-=3
     #دیکشنری تبدیل عبارات نسبی تاریخ به تاریخ مطلق
     pred=int(pred)
 
     m={
-        "n":datetime.now() - timedelta(days=pred)
+        "n":datetime.now() - timedelta(days=f)
     }
 
 
@@ -129,21 +156,17 @@ def machine(message):
     else: 
         pred = 0  # مقدار پیش‌فرض در صورت نامعتبر بودن pred
 
-    # دیکشنری تبدیل عبارات نسبی تاریخ به تاریخ مطلق
-    m = {"n": datetime.now() - timedelta(days=pred)}
-
     # استفاده از دیکشنری و جداسازی داده مورد نیاز
     j = str(m["n"])
     
     date_only = j.split(' ')[0]
     
-
+    p=result(date_only)
     if pred<=2:
         if n==1:
             return p.print_present()
         else:
-            p=result(date_only)
-            return p.pressent()
+            return p.pressent(0)
     elif pred<=5:
         if n==1:
             return p.print_absent()
