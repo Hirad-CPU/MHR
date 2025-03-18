@@ -59,6 +59,15 @@ def machine(message):
 
         return "عکس رو گرفتم فقط برای احتیاط, دانش آموز دو یا سه ثانیه جلو دوربین بایستد, ممنون"
     
+    if "3" in file_data1:
+        # پاک کردن محتوای فایل‌های مربوط به کلاس‌ها
+        for filename in  ["seven.txt", "eight.txt", "nine.txt"]:
+            with open(filename, "w", encoding="utf-8") as file:
+                file.write("")
+        print("صبر کردن به مدت 15 ثانیه")
+        time.sleep(10)
+        return "اطلاعات کلاس های دخیره شدع پاک شد"
+
     else:
         class result:
             def __init__(self,date):
@@ -169,9 +178,12 @@ def machine(message):
             "پرینت حاضرین پریروز ",
             "ذخیره عکس",
             "اضافه کردن عکس",
-            "ثبت عکس"
+            "ثبت عکس",
+            "پاک کردن داده ها",
+            "داده ها رو پاک کن",
+            "پاک"
         ]
-        labels = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 20, 20, 20, 21, 21, 21, 22, 22, 22,31,31,31] #مقددار دهی دستور ها
+        labels = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 20, 20, 20, 21, 21, 21, 22, 22, 22, 31, 31, 31, 32, 32, 32] #مقددار دهی دستور ها
 
         # مرحله ۱: استخراج ویژگی‌های متنی با TF-IDF
         vectorizer = TfidfVectorizer()
@@ -235,3 +247,6 @@ def machine(message):
             with open("CHECK.txt",'a') as file:
                 file.write("1")
             return "لطفا نام کاربر رو وارد کن"
+        elif pred==32:
+            with open("CHECK.txt",'a') as file:
+                file.write("3")
