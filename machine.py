@@ -27,7 +27,7 @@ def machine(message):
             file_data1 = set(file.read().splitlines())
         return "لطفا کلاس دانش آموز را وارد کنید"
 
-    if "2" in file_data1:
+    elif "2" in file_data1:
         # اضافه کردن پیام به فایل
         with open("CHECK.txt", "a+", encoding="utf-8") as file:
             file.write(message + "\n")
@@ -58,15 +58,24 @@ def machine(message):
 
 
         return "عکس رو گرفتم فقط برای احتیاط, دانش آموز دو یا سه ثانیه جلو دوربین بایستد, ممنون"
-    
+
+    # خواندن محتوای فایل و ذخیره به صورت یک مجموعه برای بررسی درخواست پاک کردن داده ها
+    with open("CHECK.txt", "r", encoding="utf-8") as file:
+        file_data1 = set(file.read().splitlines())
+
     if "3" in file_data1:
+        print(2)
         # پاک کردن محتوای فایل‌های مربوط به کلاس‌ها
         for filename in  ["seven.txt", "eight.txt", "nine.txt"]:
             with open(filename, "w", encoding="utf-8") as file:
                 file.write("")
-        print("صبر کردن به مدت 15 ثانیه")
+        # پاک کردن فایل بعد از 15 ثانیه
         time.sleep(10)
+        with open("CHECK.txt", "w", encoding="utf-8") as file:
+            file.write("")
+        print(10)  # برای دیباگ
         return "اطلاعات کلاس های دخیره شدع پاک شد"
+
 
     else:
         class result:
@@ -179,8 +188,8 @@ def machine(message):
             "ذخیره عکس",
             "اضافه کردن عکس",
             "ثبت عکس",
-            "پاک کردن داده ها",
-            "داده ها رو پاک کن",
+            "پاک کن",
+            "داده ها پاک",
             "پاک"
         ]
         labels = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 20, 20, 20, 21, 21, 21, 22, 22, 22, 31, 31, 31, 32, 32, 32] #مقددار دهی دستور ها
@@ -201,10 +210,9 @@ def machine(message):
 
         # پیش‌بینی دسته دستور
         pred = int(clf.predict(X_input)[0])
-
-
-        print(pred)
-        #
+        print(f"ورودی: {message}, پیشبینی: {pred}")
+        print(3)
+    
         #برگذازی شرایط برای پرینتر
         if pred in [20, 21, 22, 23, 24, 25]:
             pred-=20
@@ -250,3 +258,6 @@ def machine(message):
         elif pred==32:
             with open("CHECK.txt",'a') as file:
                 file.write("3")
+                print(4)
+        
+            
