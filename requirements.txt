@@ -1,0 +1,13 @@
+adafruit_fingerprint
+board
+opencv-python
+dateparser
+face_recognition
+glob2
+gpiozero
+machine
+numpy
+requests
+serial
+systemd-socketserver
+spidev
