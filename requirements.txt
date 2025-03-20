@@ -10,3 +10,4 @@ requests
 serial
 systemd-socketserver
 spidev
+PyQt6
