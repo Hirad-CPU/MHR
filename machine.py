@@ -75,8 +75,65 @@ def machine(message):
             file.write("")
         print(10)  # برای دیباگ
         return "اطلاعات کلاس های دخیره شدع پاک شد"
+    
 
+    # خواندن محتوای فایل و ذخیره به صورت یک مجموعه برای بررسی درخواست پاک کردن داده ها
+    with open("CHECK.txt", "r", encoding="utf-8") as file:
+        file_data1 = set(file.read().splitlines())
+        
+    if "4" in file_data1:
+        with open("CHECK.txt", "w", encoding="utf-8") as file:
+            file.write(message + "\n")
+            print(message)        
+            file.write("5\n")
+        with open("CHECK.txt", "r", encoding="utf-8") as file:
+            file_data1 = set(file.read().splitlines())
+        print(file_data1)  # برای دیباگ، محتوای فایل را نمایش بده
 
+        with open("CHECK.txt", "r", encoding="utf-8") as file:
+            file_data1 = set(file.read().splitlines())
+        return "لطفا کلاس دانش آموز را وارد کنید"
+
+    elif "5" in file_data1:
+        # اضافه کردن پیام به فایل
+        with open("CHECK.txt", "a+", encoding="utf-8") as file:
+            file.write(message + "\n")
+        with open("CHECK.txt", "r", encoding="utf-8") as file:
+            #انتفال دیتا دانش آموز جدید به لیست داده
+            file_data2 = file.read().splitlines()
+        #دادن مقدار به فایل دیتا مربوط به کلاس کاربر با توجه به درخواست
+        print(file_data2)
+        if "هفتم" in file_data2:
+            print(990)
+            with open("seven.txt","r",encoding="utf-8") as file:
+                lines = file.readlines()
+            with open("seven.txt","w",encoding="utf-8") as file:
+                for line in lines:
+                    if line.strip() != file_data2[0]:  # اگر خط برابر با نام نباشد، نگه می‌داریم
+                        file.write(line)
+        elif "هشتم" in file_data2:
+            with open("eight.txt","r",encoding="utf-8") as file:
+                lines = file.readlines()
+            with open("eight.txt","w",encoding="utf-8") as file:
+                for line in lines:
+                    if line.strip() != file_data2[0]:  # اگر خط برابر با نام نباشد، نگه می‌داریم
+                        file.write(line)
+        elif "نهم" in file_data2:
+            with open("nine.txt","r",encoding="utf-8") as file:
+                lines = file.readlines()
+            with open("nine.txt","w",encoding="utf-8") as file:
+                for line in lines:
+                    if line.strip() != file_data2[0]:  # اگر خط برابر با نام نباشد، نگه می‌داریم
+                        file.write(line)
+
+        # اجرای سرور در یک ترد جداگانه
+        threading.Thread(target=httpp.httpp, daemon=True).start()
+        
+         # پاک کردن فایل بعد از 15 ثانیه
+        time.sleep(15)
+        with open("CHECK.txt", "w", encoding="utf-8") as file:
+            file.write("")
+        return "فرد مورد نظر پاک شد"
     else:
         class result:
             def __init__(self,date):
@@ -188,11 +245,14 @@ def machine(message):
             "ذخیره عکس",
             "اضافه کردن عکس",
             "ثبت عکس",
-            "پاک کن",
-            "داده ها پاک",
-            "پاک"
+            "همه رو پاک کن",
+            "داده ها رو پاک",
+            "پاک",
+            "یدونه رو پاک کن",
+            "یک نفر رو پاک کن",
+            "پاک یه نفر"
         ]
-        labels = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 20, 20, 20, 21, 21, 21, 22, 22, 22, 31, 31, 31, 32, 32, 32] #مقددار دهی دستور ها
+        labels = [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 20, 20, 20, 21, 21, 21, 22, 22, 22, 31, 31, 31, 32, 32, 32, 33, 33, 33] #مقددار دهی دستور ها
 
         # مرحله ۱: استخراج ویژگی‌های متنی با TF-IDF
         vectorizer = TfidfVectorizer()
@@ -259,5 +319,9 @@ def machine(message):
             with open("CHECK.txt",'a') as file:
                 file.write("3")
                 print(4)
+        elif pred==33:
+            with open("CHECK.txt","a") as file:
+                file.write("4")
+                return "لطفا نام کاربر حذفی رو وارد کن"
         
             
