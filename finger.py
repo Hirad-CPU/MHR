@@ -65,7 +65,7 @@ def get_fingerprint_detail():
             print("Other error")
         return False
 
-def enroll_finger(location):
+def enroll_finger():
     """Take a 2 finger images and template it, then store in 'location'"""
     for fingerimg in range(1, 3):
         if fingerimg == 1:
@@ -92,14 +92,7 @@ def enroll_finger(location):
         if i == adafruit_fingerprint.OK:
             print("Templated")
         else:
-            if i == adafruit_fingerprint.IMAGEMESS:
-                print("Image too messy")
-            elif i == adafruit_fingerprint.FEATUREFAIL:
-                print("Could not identify features")
-            elif i == adafruit_fingerprint.INVALIDIMAGE:
-                print("Image invalid")
-            else:
-                print("Other error")
+            print("we have a problem")
             return False
 
         if fingerimg == 1:
@@ -119,6 +112,30 @@ def enroll_finger(location):
             print("Other error")
         return False
 
+
+    # خواندن بزرگ‌ترین عدد از فایل fingerprints.txt
+    with open("fingerprints.txt", "r", encoding="utf-8") as file:
+        numbers = [int(line.split()[0]) for line in file if line.split()[0].isdigit()]
+
+    max_number = max(numbers)
+    new_number = max_number + 1
+
+    # خواندن یک نام از فایل دیگر
+    with open("CHECK.txt", "r", encoding="utf-8") as name_file:
+        lines = name_file.readlines()  # خواندن تمام خطوط
+        if len(lines) > 1:  # بررسی اینکه حداقل دو خط وجود دارد
+            name = lines[1].strip()  # گرفتن دومین خط و حذف فاصله‌های اضافی
+        else:
+            name = "Unknown"  # اگر خط دوم نبود، مقدار پیش‌فرض
+
+
+    # اضافه کردن مقدار جدید به فایل fingerprints.txt
+    with open("fingerprints.txt", "a", encoding="utf-8") as file:
+        file.write(f"\n{new_number} {name}")  # اضافه کردن مقدار جدید در خط جدید
+    location=new_number
+    
+
+
     print("Storing model #%d..." % location, end="")
     i = finger.store_model(location)
     if i == adafruit_fingerprint.OK:
@@ -136,15 +153,8 @@ def enroll_finger(location):
 
 ##################################################
 
-def get_num():
-    """Use input() to get a valid number from 1 to 127. Retry till success!"""
-    i = 0
-    while (i > 1000) or (i < 1):
-        try:
-            i = int(input("Enter ID # from 1-1000: "))
-        except ValueError:
-            pass
-    return i
+    
+
 # تابعی برای خواندن فایل و تبدیل به دیکشنری
 def load_fingerprint_data(filename="fingerprints.txt"):
     fingerprint_dict = {}  # دیکشنری برای نگه‌داری داده‌ها
@@ -175,6 +185,25 @@ def check_and_store(value, filename="data.txt"):
 # بارگذاری نام‌ها از فایل
 fingerprint_names = load_fingerprint_data()
 
+def delete_all_fingerprints():
+    """حذف تمام اثر انگشت‌ها از سنسور و فایل"""
+    # حذف تمامی اثر انگشت‌ها از سنسور
+    print("Deleting all fingerprints from sensor...")
+    for location in range(1, 1000):  # فرض می‌کنیم که حداکثر 500 اثر انگشت می‌تواند ذخیره شود
+        if finger.delete_model(location) == adafruit_fingerprint.OK:
+            print(f"Fingerprint {location} deleted from sensor.")
+        else:
+            print(f"Failed to delete fingerprint {location} from sensor.")
+
+    # حذف تمام داده‌ها از فایل fingerprints.txt
+    try:
+        with open("fingerprints.txt", "w", encoding="utf-8") as file:
+            file.truncate(0)  # محتویات فایل را پاک می‌کند
+        print("All fingerprints removed from fingerprints.txt.")
+    except FileNotFoundError:
+        print("Error: fingerprints.txt not found!")
+
+
 while True:
     print("----------------")
     if finger.read_templates() != adafruit_fingerprint.OK:
@@ -182,9 +211,18 @@ while True:
     print("Fingerprint templates:", finger.templates)
     print("e) enroll print")
     print("f) find print")
-    print("d) delete print")
+    print("d) delete print")    
     print("----------------")
-    
+    with open("CHECK.txt", "r", encoding="utf-8") as file:
+        file_data1 = file.read().splitlines()
+        time.sleep(13)
+    if 2 in file_data1:
+        enroll_finger()
+        time.sleep(2)
+    if 3 in file_data1:
+        delete_all_fingerprints()
+
+
     # تابع بررسی اثر انگشت
     if get_fingerprint():
         user_id = finger.finger_id
