@@ -204,6 +204,63 @@ def delete_all_fingerprints():
         print("Error: fingerprints.txt not found!")
 
 
+def delete_fingerprint_by_name():
+    """حذف اثر انگشت از سنسور و فایل fingerprints.txt بر اساس نام در CHECK.txt"""
+    
+    # خواندن نام از CHECK.txt
+    try:
+        with open("CHECK.txt", "r", encoding="utf-8") as name_file:
+            lines = name_file.readlines()
+            if len(lines) > 1:
+                name_to_delete = lines[1].strip()  # گرفتن خط دوم به عنوان نام
+            else:
+                print("Error: No valid name found in CHECK.txt")
+                return
+    except FileNotFoundError:
+        print("Error: CHECK.txt not found!")
+        return
+
+    # خواندن fingerprints.txt و پیدا کردن عدد مربوط به نام
+    fingerprint_entries = []
+    fingerprint_id = None
+
+    try:
+        with open("fingerprints.txt", "r", encoding="utf-8") as file:
+            lines = file.readlines()
+            for line in lines:
+                parts = line.strip().split(maxsplit=1)
+                if len(parts) == 2:
+                    id_number, stored_name = parts
+                    if stored_name == name_to_delete:
+                        fingerprint_id = int(id_number)  # گرفتن عدد مرتبط با نام
+                    else:
+                        fingerprint_entries.append(line.strip())  # نگه داشتن بقیه داده‌ها
+    except FileNotFoundError:
+        print("Error: fingerprints.txt not found!")
+        return
+
+    if fingerprint_id is None:
+        print(f"Name '{name_to_delete}' not found in fingerprints.txt!")
+        return
+
+    # حذف اثر انگشت از سنسور
+    print(f"Deleting fingerprint {fingerprint_id} from sensor...")
+    if finger.delete_model(fingerprint_id) == adafruit_fingerprint.OK:
+        print(f"Fingerprint {fingerprint_id} deleted from sensor.")
+    else:
+        print(f"Failed to delete fingerprint {fingerprint_id} from sensor.")
+
+    # نوشتن داده‌های جدید بدون اثر انگشت حذف شده
+    try:
+        with open("fingerprints.txt", "w", encoding="utf-8") as file:
+            for entry in fingerprint_entries:
+                file.write(entry + "\n")
+        print(f"Entry '{fingerprint_id} {name_to_delete}' removed from fingerprints.txt.")
+    except FileNotFoundError:
+        print("Error: Unable to update fingerprints.txt!")
+
+
+
 while True:
     print("----------------")
     if finger.read_templates() != adafruit_fingerprint.OK:
@@ -222,6 +279,11 @@ while True:
     if 3 in file_data1:
         delete_all_fingerprints()
         time.sleep(2)
+    if 5 in file_data1:
+        delete_fingerprint_by_name()
+        time.sleep(2)
+
+
 
 
     # تابع بررسی اثر انگشت
