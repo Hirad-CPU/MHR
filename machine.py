@@ -322,6 +322,9 @@ def machine(message):
         elif pred==33:
             with open("CHECK.txt","a") as file:
                 file.write("4")
+                # خواندن محتوای فایل و ذخیره به صورت یک مجموعه برای بررسی درخواست پاک کردن داده ها
+            with open("CHECK.txt", "r", encoding="utf-8") as file:
+                file_data1 = set(file.read().splitlines())
                 return "لطفا نام کاربر حذفی رو وارد کن"
         
             
