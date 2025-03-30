@@ -221,6 +221,7 @@ while True:
         time.sleep(2)
     if 3 in file_data1:
         delete_all_fingerprints()
+        time.sleep(2)
 
 
     # تابع بررسی اثر انگشت
