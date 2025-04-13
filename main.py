@@ -12,6 +12,7 @@ RST = DigitalOutputDevice(27) # Reset
 
 spi = spidev.SpiDev(0, 0)
 spi.max_speed_hz = 60000000
+
 # دستورات ILI9341
 ILI9341_SWRESET = 0x01
 ILI9341_SLPOUT  = 0x11
@@ -23,20 +24,22 @@ ILI9341_RAMWR   = 0x2C
 WIDTH = 240
 HEIGHT = 320
 
+# ارسال دستور به نمایشگر (فرمان کنترلی)
 def send_command(cmd):
     DC.off()
     CS.off()
     spi.writebytes([cmd])
     CS.on()
 
+# ارسال داده به نمایشگر (مثلاً اطلاعات پیکسلی)
 def send_data(data):
     if data is None:
         print("خطا: داده ورودی None است!")
         return
-    
+
     DC.on()
     CS.off()
-    chunk_size = 4096
+    chunk_size = 4096  # ارسال به صورت تکه‌تکه برای پایداری
     if isinstance(data, int):
         spi.writebytes([data])
     else:
@@ -44,6 +47,7 @@ def send_data(data):
             spi.writebytes(data[i:i+chunk_size])
     CS.on()
 
+# راه‌اندازی اولیه نمایشگر ILI9341
 def init_display():
     RST.off()
     time.sleep(0.1)
@@ -53,6 +57,7 @@ def init_display():
     send_command(ILI9341_SWRESET)
     time.sleep(0.12)
 
+    # ارسال تنظیمات اولیه درایور نمایشگر
     send_command(0xCB)
     send_data([0x39, 0x2C, 0x00, 0x34, 0x02])
     send_command(0xCF)
@@ -95,6 +100,7 @@ def init_display():
     send_command(ILI9341_DISPON)
     time.sleep(0.12)
 
+# تعیین محدوده‌ای از نمایشگر برای نوشتن داده پیکسلی
 def set_address_window(x0, y0, x1, y1):
     send_command(ILI9341_CASET)
     send_data([x0 >> 8, x0 & 0xFF, x1 >> 8, x1 & 0xFF])
@@ -102,15 +108,15 @@ def set_address_window(x0, y0, x1, y1):
     send_data([y0 >> 8, y0 & 0xFF, y1 >> 8, y1 & 0xFF])
     send_command(ILI9341_RAMWR)
 
+# تبدیل فریم تصویر OpenCV به فرمت RGB565 مناسب برای نمایشگر
 def frame_to_rgb565(frame):
     if frame is None:
         print("خطا: فریم ورودی None است!")
         return []
-    
-    # تغییر اندازه فریم به ابعاد نمایشگر
+
     try:
         img = cv2.resize(frame, (WIDTH, HEIGHT))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # تبدیل BGR به RGB
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     except Exception as e:
         print(f"خطا در پردازش تصویر: {e}")
         return []
@@ -119,33 +125,30 @@ def frame_to_rgb565(frame):
     for y in range(HEIGHT):
         for x in range(WIDTH):
             r, g, b = img[y, x]
-            # اطمینان از اینکه مقادیر در محدوده 0-255 هستند و به صورت صحیح هستند
             r = int(max(0, min(255, r)))
             g = int(max(0, min(255, g)))
             b = int(max(0, min(255, b)))
-            
-            # تبدیل به RGB565: 5 بیت قرمز، 6 بیت سبز، 5 بیت آبی
-            r5 = (r >> 3) & 0x1F  # 5 بیت قرمز
-            g6 = (g >> 2) & 0x3F  # 6 بیت سبز
-            b5 = (b >> 3) & 0x1F  # 5 بیت آبی
-            rgb565 = (r5 << 11) | (g6 << 5) | b5  # ترکیب بیت‌ها
-            
-            # بررسی اینکه rgb565 در محدوده 0 تا 65535 است
+
+            r5 = (r >> 3) & 0x1F
+            g6 = (g >> 2) & 0x3F
+            b5 = (b >> 3) & 0x1F
+            rgb565 = (r5 << 11) | (g6 << 5) | b5
+
             rgb565 = min(65535, max(0, rgb565))
-            # تقسیم به دو بایت 8 بیتی
-            pixel_data.append((rgb565 >> 8) & 0xFF)  # بایت بالایی
-            pixel_data.append(rgb565 & 0xFF)          # بایت پایینی
-    
+            pixel_data.append((rgb565 >> 8) & 0xFF)
+            pixel_data.append(rgb565 & 0xFF)
+
     return pixel_data
 
+# نمایش یک فریم روی نمایشگر ILI9341
 def display_frame(frame):
     if frame is None:
         print("خطا: فریم ورودی None است!")
         return
-    
+
     set_address_window(0, 0, WIDTH - 1, HEIGHT - 1)
     frame_data = frame_to_rgb565(frame)
-    if not frame_data:  # بررسی اینکه داده خالی نباشد
+    if not frame_data:
         print("خطا: داده فریم خالی است!")
         return
     send_data(frame_data)
@@ -163,15 +166,13 @@ print(f"فایل '{filename}' ایجاد شد.")
 # مقداردهی اولیه نمایشگر
 init_display()
 
-# حلقه اصلی
+# حلقه اصلی پردازش تصویر و تشخیص چهره
 while True:
     ret, frame = cap.read()
     if not ret or frame is None:
         print("خطا: فریم از دوربین دریافت نشد یا فریم None است!")
-      # تاخیر کوتاه برای جلوگیری از مصرف بی‌مورد CPU
         continue
 
-    # تشخیص چهره
     face_locations, names = sfr.detect_known_faces(frame)
     for face_loc, name in zip(face_locations, names):
         if name not in nameless:
@@ -182,10 +183,8 @@ while True:
             nameless.append(name)
         print(name)
 
-    # نمایش فریم روی نمایشگر
     display_frame(frame)
 
-    # خروج با کلید ESC
     key = cv2.waitKey(1)
     if key == 27:
         break
