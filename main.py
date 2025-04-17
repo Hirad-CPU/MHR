@@ -188,29 +188,29 @@ while True:
             nameless.append(name)
         print(name)
 
-    # خواندن فایل CHECK.txt برای بررسی عملیات خاص
-    with open("CHECK.txt", "r", encoding="utf-8") as file:
-        file_data1 = file.read().splitlines()
+# خواندن فایل CHECK.txt برای بررسی عملیات خاص
+with open("CHECK.txt", "r", encoding="utf-8") as file:
+    file_data1 = file.read().splitlines()
 
-        folder_path = 'images'  # مسیر فولدر تصاویر
-        keep_file = "keep.jpg"  # فایلی که نباید حذف شود
+folder_path = 'images'  # مسیر فولدر تصاویر
+keep_file = "keep.jpg"  # فایلی که نباید حذف شود
 
-        if "2" or '4' in file_data1:
-            text = text.replace(" ", "_")
-            file_data1 = text + '_' + file_data1[1] + 'jpg'
-            image_path = os.path.join('images', file_data1)
+if "2" in file_data1 or "4" in file_data1:
+    text = file_data1[0].replace(" ", "_")  # فرض بر اینه که اسم اول فایل اینجاست
+    image_name = f"{text}_{file_data1[1]}.jpg"  # ساختن اسم فایل
+    image_path = os.path.join(folder_path, image_name)
 
-            if '2' in file_data1:
-                cv2.imwrite(image_path, frame)  # ذخیره تصویر جدید
-            elif '4' in file_data1:
-                if os.path.exists(image_path):
-                    os.remove(image_path)  # حذف تصویر خاص
+    if "2" in file_data1:
+        cv2.imwrite(image_path, frame)  # ذخیره تصویر جدید
+    elif "4" in file_data1:
+        if os.path.exists(image_path):
+            os.remove(image_path)  # حذف تصویر خاص
 
-        elif '3' in file_data1:
-            for file_name in os.listdir(folder_path):
-                file_path = os.path.join(folder_path, file_name)
-                if os.path.isfile(file_path) and file_name != keep_file:
-                    os.remove(file_path)  # حذف همه فایل‌ها بجز فایل خاص
+elif "3" in file_data1:
+    for file_name in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file_name)
+        if os.path.isfile(file_path) and file_name != keep_file:
+            os.remove(file_path)  # حذف همه فایل‌ها بجز فایل خاص
 
     # نمایش تصویر روی نمایشگر
     display_frame(frame)
