@@ -131,9 +131,13 @@ def enroll_finger():
         else:
             name = "Unknown"
 
-    # ذخیره ID جدید همراه با نام در فایل fingerprints.txt
-    with open("fingerprints.txt", "a", encoding="utf-8") as file:
-        file.write(f"\n{new_number} {name}")
+# ذخیره ID جدید همراه با نام در فایل fingerprints.txt
+with open("fingerprints.txt", "a", encoding="utf-8") as file:
+    # بررسی اینکه آیا فایل خالی است یا خیر
+    file.seek(0, 2)  # رفتن به انتهای فایل
+    if file.tell() > 0:  # اگر فایل خالی نیست، یک خط جدید اضافه کن
+        file.write("\n")
+    file.write(f"{new_number} {name}")
     location = new_number
 
     print("Storing model #%d..." % location, end="")
@@ -159,6 +163,9 @@ def load_fingerprint_data(filename="fingerprints.txt"):
     try:
         with open(filename, "r") as file:
             for line in file:
+                line = line.strip()
+                if not line:  # نادیده گرفتن خطوط خالی
+                    continue
                 parts = line.strip().split(maxsplit=1)
                 if len(parts) == 2:
                     fingerprint_id, name = parts
