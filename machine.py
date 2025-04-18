@@ -1,4 +1,4 @@
- # Import کتابخانه‌های مورد نیاز
+ # ایمپورت کتابخانه‌های مورد نیاز برای پردازش متن، مدل یادگیری ماشین، زمان و اجرای سرور
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 import dateparser
@@ -6,35 +6,40 @@ from datetime import datetime, timedelta
 import httpp
 import time
 import threading
-#متغیر ها
+
+# تعریف متغیر عمومی
 n=0
-#تبدیل به تابع برای ایمپوت کردن
+
+# تبدیل کل عملیات به تابع برای دریافت پیام به‌عنوان ورودی
 def machine(message):
     print(0)
-    # خواندن محتوای فایل و ذخیره به صورت یک مجموعه برای بررسی درخواست ذخیره عکس
+
+    # خواندن محتوای فایل و بررسی اینکه آیا در وضعیت "ذخیره عکس" هست یا نه
     with open("CHECK.txt", "r", encoding="utf-8") as file:
         file_data1 = set(file.read().splitlines())
 
+    # اگر وضعیت ذخیره عکس فعال باشد
     if "1" in file_data1:
         with open("CHECK.txt", "w", encoding="utf-8") as file:
             file.write(message + "\n")
             file.write("2\n")
         with open("CHECK.txt", "r", encoding="utf-8") as file:
             file_data1 = set(file.read().splitlines())
-        print(file_data1)  # برای دیباگ، محتوای فایل را نمایش بده
+        print(file_data1)  # چاپ وضعیت فعلی برای دیباگ
 
         with open("CHECK.txt", "r", encoding="utf-8") as file:
             file_data1 = set(file.read().splitlines())
         return "لطفا کلاس دانش آموز را وارد کنید"
 
+    # مرحله دوم ذخیره‌سازی (پس از دریافت نام و کلاس دانش‌آموز)
     elif "2" in file_data1:
-        # اضافه کردن پیام به فایل
+        # اضافه کردن پیام جدید به فایل
         with open("CHECK.txt", "a+", encoding="utf-8") as file:
             file.write(message + "\n")
         with open("CHECK.txt", "r", encoding="utf-8") as file:
-            #انتفال دیتا دانش آموز جدید به لیست داده
+            # انتقال داده به لیست
             file_data2 = file.read().splitlines()
-        #دادن مقدار به فایل دیتا مربوط به کلاس کاربر با توجه به درخواست
+        # بر اساس کلاس، ذخیره در فایل مرتبط
         print(file_data2)
         if "هفتم" in file_data2:
             print(990)
@@ -46,38 +51,36 @@ def machine(message):
         elif "نهم" in file_data2:
             with open("nine.txt","a",encoding="utf-8") as file:
                 file.write(file_data2[0]+"\n")
+
         # اجرای سرور در یک ترد جداگانه
         threading.Thread(target=httpp.httpp, daemon=True).start()
 
-         
-        # پاک کردن فایل بعد از 15 ثانیه
+        # پاکسازی فایل وضعیت بعد از ۱۵ ثانیه
         time.sleep(15)
         with open("CHECK.txt", "w", encoding="utf-8") as file:
             file.write("")
-        print(9)  # برای دیباگ
-
+        print(9)  # چاپ پیام دیباگ
 
         return "عکس رو گرفتم فقط برای احتیاط, دانش آموز دو یا سه ثانیه جلو دوربین بایستد, ممنون"
 
-    # خواندن محتوای فایل و ذخیره به صورت یک مجموعه برای بررسی درخواست پاک کردن داده ها
+    # بررسی درخواست پاک‌سازی تمام اطلاعات
     with open("CHECK.txt", "r", encoding="utf-8") as file:
         file_data1 = set(file.read().splitlines())
 
     if "3" in file_data1:
         print(2)
-        # پاک کردن محتوای فایل‌های مربوط به کلاس‌ها
+        # پاک کردن اطلاعات تمام کلاس‌ها
         for filename in  ["seven.txt", "eight.txt", "nine.txt"]:
             with open(filename, "w", encoding="utf-8") as file:
                 file.write("")
-        # پاک کردن فایل بعد از 15 ثانیه
+        # پاک کردن وضعیت پس از ۱۰ ثانیه
         time.sleep(10)
         with open("CHECK.txt", "w", encoding="utf-8") as file:
             file.write("")
-        print(10)  # برای دیباگ
+        print(10)  # دیباگ
         return "اطلاعات کلاس های دخیره شدع پاک شد"
-    
 
-    # خواندن محتوای فایل و ذخیره به صورت یک مجموعه برای بررسی درخواست پاک کردن داده ها
+    # بررسی درخواست پاک‌سازی یک نفر خاص
     with open("CHECK.txt", "r", encoding="utf-8") as file:
         file_data1 = set(file.read().splitlines())
         
@@ -88,60 +91,64 @@ def machine(message):
             file.write("5\n")
         with open("CHECK.txt", "r", encoding="utf-8") as file:
             file_data1 = set(file.read().splitlines())
-        print(file_data1)  # برای دیباگ، محتوای فایل را نمایش بده
+        print(file_data1)  # دیباگ
 
         with open("CHECK.txt", "r", encoding="utf-8") as file:
             file_data1 = set(file.read().splitlines())
         return "لطفا کلاس دانش آموز را وارد کنید"
 
+    # مرحله دوم حذف فرد خاص پس از دریافت کلاس
     elif "5" in file_data1:
-        # اضافه کردن پیام به فایل
+        # اضافه کردن پیام جدید به فایل
         with open("CHECK.txt", "a+", encoding="utf-8") as file:
             file.write(message + "\n")
         with open("CHECK.txt", "r", encoding="utf-8") as file:
-            #انتفال دیتا دانش آموز جدید به لیست داده
             file_data2 = file.read().splitlines()
-        #دادن مقدار به فایل دیتا مربوط به کلاس کاربر با توجه به درخواست
         print(file_data2)
+
+        # حذف فرد از فایل کلاس مربوطه
         if "هفتم" in file_data2:
             print(990)
             with open("seven.txt","r",encoding="utf-8") as file:
                 lines = file.readlines()
             with open("seven.txt","w",encoding="utf-8") as file:
                 for line in lines:
-                    if line.strip() != file_data2[0]:  # اگر خط برابر با نام نباشد، نگه می‌داریم
+                    if line.strip() != file_data2[0]:
                         file.write(line)
         elif "هشتم" in file_data2:
             with open("eight.txt","r",encoding="utf-8") as file:
                 lines = file.readlines()
             with open("eight.txt","w",encoding="utf-8") as file:
                 for line in lines:
-                    if line.strip() != file_data2[0]:  # اگر خط برابر با نام نباشد، نگه می‌داریم
+                    if line.strip() != file_data2[0]:
                         file.write(line)
         elif "نهم" in file_data2:
             with open("nine.txt","r",encoding="utf-8") as file:
                 lines = file.readlines()
             with open("nine.txt","w",encoding="utf-8") as file:
                 for line in lines:
-                    if line.strip() != file_data2[0]:  # اگر خط برابر با نام نباشد، نگه می‌داریم
+                    if line.strip() != file_data2[0]:
                         file.write(line)
 
-        # اجرای سرور در یک ترد جداگانه
+        # اجرای سرور در یک ترد جدا
         threading.Thread(target=httpp.httpp, daemon=True).start()
         
-         # پاک کردن فایل بعد از 15 ثانیه
+        # پاکسازی فایل وضعیت بعد از ۱۵ ثانیه
         time.sleep(15)
         with open("CHECK.txt", "w", encoding="utf-8") as file:
             file.write("")
         return "فرد مورد نظر پاک شد"
+
     else:
+        # تعریف کلاس مدیریت وضعیت حضور و غیاب
         class result:
             def __init__(self,date):
                 self.date=date
 
-                # نام فایل متنی
+                # نام فایل مربوط به تاریخ خاص
                 self.file_name = f"{self.date}.txt"
-                # لیست داده‌هایی که می‌خواهید بررسی کنید
+
+                # خواندن لیست اسامی دانش‌آموزان هر کلاس
                 with open("seven.txt", "r",encoding='utf-8') as file:
                     self.seven_list= file.read().splitlines()
                 with open("eight.txt","r",encoding="utf-8") as file:
@@ -149,7 +156,7 @@ def machine(message):
                 with open("nine.txt","r",encoding="utf-8") as file:
                     self.nine_list=file.read().splitlines()
             
-                #لیست افراد حاضر
+                # تعریف لیست افراد حاضر در هر کلاس
                 self.pressent_seven=[]
                 self.pressent_eight=[]
                 self.pressent_nine=[]
@@ -157,18 +164,16 @@ def machine(message):
             def print_absent():
                 print(1)
 
-
-
-            # تعریف توابع مربوط به هر دستور
+            # تابع چاپ برای دستور پرینت
             def print_function(self):
                 return("🖨 در حال پرینت گرفتن...")
+
+            # تابع نمایش لیست غایبین
             def absent(self):
                 self.pressent(1)
-                #لیست افراد غایب
                 self.not_seven=list(set(self.seven_list)-set(self.pressent_seven))
                 self.not_eight=list(set(self.eight_list)-set(self.pressent_eight))
                 self.not_nine=list(set(self.nine_list)-set(self.pressent_nine))
-
 
                 self.result_not = (
                     "کلاس هفتم:"
@@ -177,25 +182,25 @@ def machine(message):
                     f"{', '.join(self.not_eight)}\n"
                     "کلاس نهم:"
                     f"{', '.join(self.not_nine)}"
-    )
+                )
                 
                 print(self.not_seven,self.not_eight,self.not_nine)
                 return self.result_not
                 
+            # تابع بررسی و ثبت حضور دانش‌آموزان
             def pressent(self,number):
                 print(self.file_name)
-                # خواندن محتوای فایل و ذخیره به صورت یک مجموعه (set)
                 with open(self.file_name, "r", encoding="utf-8") as file:
-                    file_data = set(file.read().splitlines())  # خواندن خطوط و حذف تکراری‌ها
+                    file_data = set(file.read().splitlines())
+
                 for i, p in zip([self.seven_list, self.eight_list, self.nine_list], 
-                            [self.pressent_seven, self.pressent_eight, self.pressent_nine]):
+                                [self.pressent_seven, self.pressent_eight, self.pressent_nine]):
                     for name in i:
                         for line in file_data:
-                            if name in line:  # ✅ به جای بررسی دقیق، بررسی کنیم که نام در متن وجود دارد
+                            if name in line:
                                 p.append(name)
-                                break  # چون همین که یک بار نام پیدا شود کافی است، از حلقه خارج شوی
-                
-                        
+                                break
+
                 self.result_present = (
                     "کلاس هفتم:"
                     f"{', '.join(self.pressent_seven)}\n"
@@ -203,17 +208,13 @@ def machine(message):
                     f"{', '.join(self.pressent_eight)}\n"
                     "کلاس نهم:"
                     f"{', '.join(self.pressent_nine)}"
-    )
+                )
                 
                 if number==0:
                     print(self.result_present)
                     return self.result_present
 
-
-
-
-        # ایجاد دیتاست نمونه برای آموزش مدل
-        # در اینجا 0 نمایانگر دستور پرینت و 1 نمایانگر دستور غایب است
+        # تعریف دستورات و برچسب‌گذاری آنها برای آموزش مدل
         commands = [
             "حاضرین امروز",
             "لطفا حاضرین امروز روبده",
@@ -261,55 +262,54 @@ def machine(message):
             "یک نفر رو پاک کن",
             "پاک یه نفر"
         ]
-        labels = [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,20,20,20,21,21,21,22,22,22,23,23,23,24,24,24,25,25,25,31,31,31,32,32,32,33,33,33] #مقددار دهی دستور ها
+        labels = [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,20,20,20,21,21,21,22,22,22,23,23,23,24,24,24,25,25,25,31,31,31,32,32,32,33,33,33]
 
-        # مرحله ۱: استخراج ویژگی‌های متنی با TF-IDF
+        # تبدیل متون به ویژگی‌های عددی با TF-IDF
         vectorizer = TfidfVectorizer()
         X = vectorizer.fit_transform(commands)
 
-        # مرحله ۲: آموزش مدل ماشین لرنینگ (Logistic Regression)
+        # آموزش مدل طبقه‌بندی لجستیک رگرسیون
         clf = LogisticRegression()
         clf.fit(X, labels)
 
-
-        # تبدیل ورودی کاربر به بردار ویژگی‌ها
+        # پیش‌پردازش ورودی کاربر
         X_input = vectorizer.transform([message])
-        
         n=0
 
-        # پیش‌بینی دسته دستور
+        # پیش‌بینی دستور داده‌شده
         pred = int(clf.predict(X_input)[0])
         print(f"ورودی: {message}, پیشبینی: {pred}")
         print(3)
-    
-        #برگذازی شرایط برای پرینتر
+
+        # بررسی آیا پرینت نیاز است یا نه
         if pred in [20, 21, 22, 23, 24, 25]:
             pred-=20
             n=1
-        #پیدا کردن تاریخ مربوط به دستور غایبین
+
+        # محاسبه روز برای عبارت "دیروز" و "پریروز"
         f=pred    
         if 2<pred<20:
             f-=3
-        #دیکشنری تبدیل عبارات نسبی تاریخ به تاریخ مطلق
-        pred=int(pred)
 
+        # تبدیل روز نسبی به تاریخ دقیق
+        pred=int(pred)
         m={
             "n":datetime.now() - timedelta(days=f)
         }
 
-
-        # مقدار pred را بررسی و مقداردهی کنیم
+        # اطمینان از اینکه مقدار pred معتبر است
         if isinstance(pred, (int, float)): 
             pred = int(pred) 
         else: 
-            pred = 0  # مقدار پیش‌فرض در صورت نامعتبر بودن pred
+            pred = 0
 
-        # استفاده از دیکشنری و جداسازی داده مورد نیاز
+        # استخراج فقط تاریخ از شیء datetime
         j = str(m["n"])
-        
         date_only = j.split(' ')[0]
-        
+
+        # ساخت آبجکت result برای دریافت حضور یا غیاب
         p=result(date_only)
+
         if pred<=2:
             if n==1:
                 return p.print_present()
@@ -331,8 +331,6 @@ def machine(message):
         elif pred==33:
             with open("CHECK.txt","a") as file:
                 file.write("4")
-                # خواندن محتوای فایل و ذخیره به صورت یک مجموعه برای بررسی درخواست پاک کردن داده ها
             with open("CHECK.txt", "r", encoding="utf-8") as file:
                 file_data1 = set(file.read().splitlines())
                 return "لطفا نام کاربر حذفی رو وارد کن"
-        
