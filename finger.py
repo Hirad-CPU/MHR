@@ -2,6 +2,8 @@ import time
 import board
 import adafruit_fingerprint
 import serial
+from datetime import datetime
+
 
 # تنظیم ارتباط سریال با سنسور اثر انگشت از طریق پورت UART
 uart = serial.Serial("/dev/ttyAMA0", baudrate=57600, timeout=1)
@@ -292,10 +294,19 @@ while True:
 
     # بررسی وجود اثر انگشت تطابق‌یافته
     if get_fingerprint():
-        user_id = finger.finger_id
-        confidence = finger.confidence
-        if user_id in fingerprint_names:
-            print("Detected:", fingerprint_names[user_id], "with confidence", confidence)
-        check_and_store("test_value")
+    user_id = finger.finger_id
+    confidence = finger.confidence
+    if user_id in fingerprint_names:
+        name = fingerprint_names[user_id]
+        print("Detected:", name, "with confidence", confidence)
+
+        # گرفتن تاریخ امروز و ساختن نام فایل
+        today = datetime.now().strftime("%Y-%m-%d") 
+        filename = f"{today}.txt"
+
+        # ذخیره نام اگر قبلاً ثبت نشده
+        check_and_store(name, filename)
     else:
-        print("Detected unknown fingerprint with confidence", confidence)
+        print("Detected fingerprint with unknown ID.")
+else:
+    print("Detected unknown fingerprint.")
