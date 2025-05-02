@@ -151,6 +151,10 @@ except:
             self.scroll_area.verticalScrollBar().setValue(
                 self.scroll_area.verticalScrollBar().maximum()
             )
+        def closeEvent(self, event):
+            with open("CHECK.txt", "w") as file:
+                file.write("")  # پاک‌سازی محتوای فایل
+            event.accept()  # اجازه بده پنجره بسته بشه
 
     # اجرای برنامه
     name = "__main__"
@@ -158,3 +162,4 @@ except:
     window = ChatWindow()
     window.show()
     sys.exit(app.exec())
+    
