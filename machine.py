@@ -1,4 +1,4 @@
- # ایمپورت کتابخانه‌های مورد نیاز برای پردازش متن، مدل یادگیری ماشین، زمان و اجرای سرور
+  # ایمپورت کتابخانه‌های مورد نیاز برای پردازش متن، مدل یادگیری ماشین، زمان و اجرای سرور
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 import dateparser
@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import httpp
 import time
 import threading
+import printer
 
 # تعریف متغیر عمومی
 n=0
@@ -67,12 +68,16 @@ def machine(message):
     with open("CHECK.txt", "r", encoding="utf-8") as file:
         file_data1 = set(file.read().splitlines())
 
-    if "3" in file_data1:
+    def delete_All():
         print(2)
         # پاک کردن اطلاعات تمام کلاس‌ها
         for filename in  ["seven.txt", "eight.txt", "nine.txt"]:
             with open(filename, "w", encoding="utf-8") as file:
                 file.write("")
+        with open('CHECK.txt','a',encoding='utf-8') as file:
+            file.write('3')
+        # اجرای سرور در یک ترد جدا
+        threading.Thread(target=httpp.httpp, daemon=True).start()
         # پاک کردن وضعیت پس از ۱۰ ثانیه
         time.sleep(10)
         with open("CHECK.txt", "w", encoding="utf-8") as file:
@@ -105,7 +110,7 @@ def machine(message):
         with open("CHECK.txt", "r", encoding="utf-8") as file:
             file_data2 = file.read().splitlines()
         print(file_data2)
-
+ 
         # حذف فرد از فایل کلاس مربوطه
         if "هفتم" in file_data2:
             print(990)
@@ -161,13 +166,21 @@ def machine(message):
                 self.pressent_eight=[]
                 self.pressent_nine=[]
                 
-            def print_absent():
-                print(1)
 
             # تابع چاپ برای دستور پرینت
-            def print_function(self):
-                return("🖨 در حال پرینت گرفتن...")
-
+            def print_function(self,result1):
+                if "pressent" in result1:
+                    self.pressent(0)
+                    printer.printer(self.pressent_seven)
+                    printer.printer(self.pressent_eight)
+                    printer.printer(self.pressent_nine)
+                    
+                elif "absent" in result1:
+                    self.absent()
+                    printer.printer(self.not_seven)
+                    printer.printer(self.not_eight)
+                    printer.printer(self.not_nine)
+                
             # تابع نمایش لیست غایبین
             def absent(self):
                 self.pressent(1)
@@ -285,6 +298,7 @@ def machine(message):
         if pred in [20, 21, 22, 23, 24, 25]:
             pred-=20
             n=1
+        print(n)
 
         # محاسبه روز برای عبارت "دیروز" و "پریروز"
         f=pred    
@@ -312,12 +326,12 @@ def machine(message):
 
         if pred<=2:
             if n==1:
-                return p.print_present()
+                return p.print_function("pressent")
             else:
                 return p.pressent(0)
         elif pred<=5:
             if n==1:
-                return p.print_absent()
+                return p.print_function("absent")
             else:
                 return p.absent()
         elif pred==31:
@@ -325,9 +339,8 @@ def machine(message):
                 file.write("1")
             return "لطفا نام کاربر رو وارد کن"
         elif pred==32:
-            with open("CHECK.txt",'a') as file:
-                file.write("3")
-                print(4)
+            print(4)
+            return delete_All()
         elif pred==33:
             with open("CHECK.txt","a") as file:
                 file.write("4")
