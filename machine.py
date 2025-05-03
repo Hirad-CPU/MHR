@@ -184,9 +184,16 @@ def machine(message):
             # تابع نمایش لیست غایبین
             def absent(self):
                 self.pressent(1)
-                self.not_seven=list(set(self.seven_list)-set(self.pressent_seven))
-                self.not_eight=list(set(self.eight_list)-set(self.pressent_eight))
-                self.not_nine=list(set(self.nine_list)-set(self.pressent_nine))
+                # استخراج فقط نام دانش‌آموزان حاضر از فرمت "نام - تاریخ"
+                present_seven_names = [item.split(" - ")[0] for item in self.pressent_seven]
+                present_eight_names = [item.split(" - ")[0] for item in self.pressent_eight]
+                present_nine_names  = [item.split(" - ")[0] for item in self.pressent_nine]
+
+                # محاسبه غایبین
+                self.not_seven = list(set(self.seven_list) - set(present_seven_names))
+                self.not_eight = list(set(self.eight_list) - set(present_eight_names))
+                self.not_nine  = list(set(self.nine_list)  - set(present_nine_names))
+
 
                 self.result_not = (
                     "کلاس هفتم:"
@@ -210,17 +217,27 @@ def machine(message):
                                 [self.pressent_seven, self.pressent_eight, self.pressent_nine]):
                     for name in i:
                         for line in file_data:
-                            if name in line:
-                                p.append(name)
-                                break
+                             if name.lower() in line.lower():
+                                try:
+                                    # تقسیم خط به نام و تاریخ
+                                    parts = line.split(" is present at ")
+                                    if len(parts) == 2: 
+                                        # فرمت‌بندی صحیح اسم و تاریخ
+                                        formatted = f"{parts[0]} - {parts[1].strip()}"
+                                        p.append(formatted)
+                                    else:
+                                        p.append(name + " (ثبت نامعتبر)")  # اگر تاریخ پیدا نشد
+                                except Exception as e:
+                                    p.append(name + f" (خطا در پردازش: {str(e)})")  # خطا در پردازش
+                                break  # اگر خط مربوط به دانش‌آموز پیدا شد، جستجو را متوقف می‌کنیم
 
                 self.result_present = (
-                    "کلاس هفتم:"
-                    f"{', '.join(self.pressent_seven)}\n"
-                    "کلاس هشتم:"
-                    f"{', '.join(self.pressent_eight)}\n"
-                    "کلاس نهم:"
-                    f"{', '.join(self.pressent_nine)}"
+                "کلاس هفتم:\n"
+                f"{chr(10).join(self.pressent_seven)}\n\n"
+                "کلاس هشتم:\n"
+                f"{chr(10).join(self.pressent_eight)}\n\n"
+                "کلاس نهم:\n"
+                f"{chr(10).join(self.pressent_nine)}"
                 )
                 
                 if number==0:
